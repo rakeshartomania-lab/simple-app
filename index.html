@@ -1,0 +1,201 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>IST Analog + Digital Clock</title>
+
+<style>
+body{
+    margin:0;
+    height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    background:linear-gradient(135deg,#141e30,#243b55);
+    font-family:Arial;
+    color:white;
+}
+
+/* Container */
+.clock-container{
+    text-align:center;
+}
+
+/* Day & Date */
+.date{
+    font-size:20px;
+    margin-bottom:8px;
+    letter-spacing:1px;
+}
+
+.day{
+    font-size:18px;
+    margin-bottom:20px;
+    color:#ddd;
+}
+
+/* Digital */
+.digital{
+    font-size:30px;
+    margin-bottom:30px;
+    letter-spacing:3px;
+}
+
+/* Analog */
+.analog{
+    width:260px;
+    height:260px;
+    border-radius:50%;
+    border:8px solid white;
+    position:relative;
+    background:rgba(255,255,255,0.08);
+    backdrop-filter:blur(10px);
+}
+
+/* Center Dot */
+.center-dot{
+    width:14px;
+    height:14px;
+    background:red;
+    border-radius:50%;
+    position:absolute;
+    top:50%;
+    left:50%;
+    transform:translate(-50%,-50%);
+}
+
+/* Hands */
+.hand{
+    position:absolute;
+    bottom:50%;
+    left:50%;
+    transform-origin:bottom center;
+    transform:translateX(-50%);
+    border-radius:6px;
+}
+
+.hour{
+    width:6px;
+    height:70px;
+    background:white;
+}
+
+.minute{
+    width:4px;
+    height:95px;
+    background:lightgray;
+}
+
+.second{
+    width:2px;
+    height:110px;
+    background:red;
+}
+
+/* Numbers */
+.number{
+    position:absolute;
+    transform:translate(-50%,-50%);
+    font-size:18px;
+    font-weight:bold;
+}
+</style>
+</head>
+
+<body>
+
+<div class="clock-container">
+
+    <div id="day" class="day"></div>
+    <div id="date" class="date"></div>
+    <div id="digital" class="digital">--:--:--</div>
+
+    <div id="analog" class="analog">
+        <div id="hour" class="hand hour"></div>
+        <div id="minute" class="hand minute"></div>
+        <div id="second" class="hand second"></div>
+        <div class="center-dot"></div>
+    </div>
+
+</div>
+
+<script>
+
+/* Create Clock Numbers */
+const analog = document.getElementById("analog");
+const center = 130;
+const radius = 110;
+
+for (let i = 1; i <= 12; i++) {
+    const num = document.createElement("div");
+    num.className = "number";
+    num.innerText = i;
+
+    const angle = i * 30 * Math.PI / 180;
+
+    num.style.left = center + radius * Math.sin(angle) + "px";
+    num.style.top = center - radius * Math.cos(angle) + "px";
+
+    analog.appendChild(num);
+}
+
+/* Update Clock */
+function updateClock() {
+
+    /* IST Time */
+    const now = new Date(
+        new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" })
+    );
+
+    const hours = now.getHours();
+    const minutes = now.getMinutes();
+    const seconds = now.getSeconds();
+    const milliseconds = now.getMilliseconds();
+
+    const days = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+    const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+
+    /* Day & Date */
+    document.getElementById("day").innerText = days[now.getDay()];
+    document.getElementById("date").innerText =
+        now.getDate() + " " +
+        months[now.getMonth()] + " " +
+        now.getFullYear();
+
+    /* Digital */
+    const displayHour = hours % 12 || 12;
+    const ampm = hours >= 12 ? "PM" : "AM";
+
+    document.getElementById("digital").innerText =
+        displayHour.toString().padStart(2, "0") + " : " +
+        minutes.toString().padStart(2, "0") + " : " +
+        seconds.toString().padStart(2, "0") + " " + ampm;
+
+    /* Smooth Analog */
+    const smoothSeconds = seconds + milliseconds / 1000;
+    const smoothMinutes = minutes + smoothSeconds / 60;
+    const smoothHours = (hours % 12) + smoothMinutes / 60;
+
+    const secondAngle = smoothSeconds * 6;
+    const minuteAngle = smoothMinutes * 6;
+    const hourAngle = smoothHours * 30;
+
+    document.getElementById("second").style.transform =
+        `translateX(-50%) rotate(${secondAngle}deg)`;
+
+    document.getElementById("minute").style.transform =
+        `translateX(-50%) rotate(${minuteAngle}deg)`;
+
+    document.getElementById("hour").style.transform =
+        `translateX(-50%) rotate(${hourAngle}deg)`;
+
+    requestAnimationFrame(updateClock);
+}
+
+updateClock();
+
+</script>
+
+</body>
+</html>
