@@ -1,7 +1,11 @@
 
+
 <!DOCTYPE html>
 <html>
 <head>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#000000">
+
 <meta charset="UTF-8">
 <title>IST Analog + Digital Clock</title>
 
@@ -195,6 +199,14 @@ function updateClock() {
 
 updateClock();
 
+</script>
+<script>
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("/service-worker.js")
+    .then(function() {
+      console.log("Service Worker Registered");
+    });
+}
 </script>
 
 </body>
