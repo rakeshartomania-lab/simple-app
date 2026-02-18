@@ -2,66 +2,51 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Sticky Notes Pro</title>
+<title>Sticky Notes Ultra Pro Max</title>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <style>
-/* ====== GLOBAL ====== */
 *{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',sans-serif;}
+
 body{
-    background:linear-gradient(135deg,#f5f7fa,#c3cfe2);
+    background:linear-gradient(135deg,#e0eafc,#cfdef3);
     min-height:100vh;
     transition:0.3s;
 }
 
-/* ====== HEADER ====== */
+/* HEADER */
 header{
     display:flex;
     justify-content:space-between;
     align-items:center;
     padding:20px 40px;
-    backdrop-filter:blur(10px);
-}
-
-header h2{
-    font-size:24px;
-    font-weight:600;
 }
 
 .header-right{
     display:flex;
     gap:10px;
+    flex-wrap:wrap;
 }
 
 button{
-    padding:8px 16px;
+    padding:8px 14px;
     border:none;
     border-radius:8px;
     cursor:pointer;
     font-weight:500;
-    transition:0.2s;
 }
 
-.primary-btn{
-    background:#6c63ff;
-    color:white;
-}
-
-.primary-btn:hover{
-    background:#574fd6;
-}
-
-.icon-btn{
-    background:white;
-    box-shadow:0 4px 10px rgba(0,0,0,0.1);
-}
+.primary-btn{background:#6c63ff;color:white;}
+.primary-btn:hover{background:#574fd6;}
 
 input{
-    padding:8px 12px;
+    padding:8px;
     border-radius:8px;
-    border:1px solid #ddd;
+    border:1px solid #ccc;
 }
 
-/* ====== NOTES GRID ====== */
+/* GRID */
 main{
     display:grid;
     grid-template-columns:repeat(auto-fill,minmax(260px,1fr));
@@ -69,47 +54,35 @@ main{
     padding:30px 40px;
 }
 
-/* ====== NOTE CARD ====== */
+/* NOTE */
 .note{
-    background:white;
     padding:20px;
     border-radius:16px;
     box-shadow:0 10px 25px rgba(0,0,0,0.08);
     position:relative;
     transition:0.2s;
 }
-
-.note:hover{
-    transform:translateY(-5px);
-    box-shadow:0 15px 30px rgba(0,0,0,0.12);
-}
-
-.note h3{
-    margin-bottom:10px;
-    font-size:18px;
-}
+.note:hover{transform:translateY(-5px);}
 
 .note small{
     position:absolute;
     bottom:10px;
     right:15px;
     font-size:11px;
-    opacity:0.6;
 }
 
-.note .actions{
+.actions{
     position:absolute;
-    top:12px;
-    right:12px;
-    font-size:14px;
+    top:10px;
+    right:10px;
+    font-size:13px;
 }
-
-.note .actions span{
-    cursor:pointer;
+.actions span{
     margin-left:8px;
+    cursor:pointer;
 }
 
-/* ====== MODAL ====== */
+/* MODAL */
 .modal{
     position:fixed;
     inset:0;
@@ -118,225 +91,240 @@ main{
     justify-content:center;
     align-items:center;
 }
-
 .hidden{display:none;}
 
 .modal-box{
     background:white;
-    width:450px;
+    width:500px;
+    padding:20px;
     border-radius:20px;
-    padding:25px;
-    box-shadow:0 20px 40px rgba(0,0,0,0.2);
-    animation:fadeIn 0.3s ease;
 }
 
-@keyframes fadeIn{
-    from{opacity:0;transform:scale(0.9);}
-    to{opacity:1;transform:scale(1);}
-}
-
-.modal-box input{
-    width:100%;
-    margin-bottom:10px;
-}
-
-/* ====== EDITOR ====== */
+/* SCROLLABLE EDITOR */
 .editor{
-    min-height:120px;
-    border:1px solid #ddd;
-    border-radius:10px;
+    height:180px;
+    overflow-y:auto;
+    border:1px solid #ccc;
     padding:10px;
-    margin-bottom:10px;
-    outline:none;
-}
-
-/* ====== TOOLBAR ====== */
-.toolbar{
-    display:flex;
-    gap:8px;
+    border-radius:10px;
     margin-bottom:10px;
 }
 
-.toolbar button{
-    background:#f0f0f0;
-    border-radius:8px;
-}
-
-.toolbar button:hover{
-    background:#ddd;
-}
-
-/* ====== DARK MODE ====== */
+/* DARK MODE */
 body.dark{
     background:#121212;
     color:white;
 }
-
-body.dark header{
-    background:#1e1e1e;
-}
-
-body.dark .note{
-    background:#1e1e1e;
-    color:white;
-}
-
-body.dark .modal-box{
-    background:#2a2a2a;
-}
+body.dark .modal-box{background:#2a2a2a;}
 </style>
 </head>
 
 <body>
 
 <header>
-    <h2>🌈 Sticky Notes Pro</h2>
-    <div class="header-right">
-        <input type="text" id="search" placeholder="Search..." oninput="render()">
-        <button class="primary-btn" onclick="openModal()">+ Add Note</button>
-        <button class="icon-btn" onclick="toggleDark()">🌙</button>
-    </div>
+<h2>🌈 Sticky Notes Ultra Pro Max</h2>
+<div class="header-right">
+<input type="text" id="search" placeholder="Search..." oninput="render()">
+<button onclick="exportPDF()">📄 Export</button>
+<button class="primary-btn" onclick="openModal()">+ Add</button>
+<button onclick="toggleDark()">🌙</button>
+</div>
 </header>
 
 <main id="notes"></main>
 
-<!-- Modal -->
-<div id="modal" class="hidden modal">
-    <div class="modal-box">
-        <input id="title" placeholder="Title">
+<div id="modal" class="modal hidden">
+<div class="modal-box">
 
-        <div class="toolbar">
-            <button onclick="format('bold')"><b>B</b></button>
-            <button onclick="format('italic')"><i>I</i></button>
-            <button onclick="format('underline')"><u>U</u></button>
-            <button onclick="speakText()">🔊</button>
-            <button onclick="startVoice()">🎤</button>
-            <input type="file" id="imageUpload" accept="image/*">
-        </div>
+<input id="title" placeholder="Title">
+<input id="category" placeholder="Category / Tag">
 
-        <div id="content" contenteditable="true" class="editor"></div>
+<label>Background Color:</label>
+<input type="color" id="noteColor">
+<br><br>
 
-        <input type="password" id="notePassword" placeholder="Password (optional)">
+<!-- TOOLBAR -->
+<div style="margin:10px 0; display:flex; gap:8px; align-items:center;">
+<button onclick="format('bold')"><b>B</b></button>
+<button onclick="format('italic')"><i>I</i></button>
+<button onclick="format('underline')"><u>U</u></button>
 
-        <div style="display:flex; justify-content:flex-end; gap:10px;">
-            <button onclick="closeModal()">Cancel</button>
-            <button class="primary-btn" onclick="saveNote()">Save</button>
-        </div>
-    </div>
+<label style="font-size:12px;">Text:</label>
+<input type="color" onchange="changeTextColor(this.value)">
+
+<button onclick="startVoice()">🎤</button>
+<button onclick="speakText()">🔊</button>
+<input type="file" id="imageUpload" accept="image/*">
+</div>
+
+<div id="content" contenteditable="true" class="editor"></div>
+
+<input type="password" id="notePassword" placeholder="Password (optional)">
+
+<div style="display:flex;justify-content:flex-end;gap:10px;">
+<button id="deleteInside" style="display:none;background:red;color:white;" onclick="deleteNote(editIndex)">Delete</button>
+<button onclick="closeModal()">Cancel</button>
+<button class="primary-btn" onclick="saveNote()">Save</button>
+</div>
+
+</div>
 </div>
 
 <script>
-let notes = JSON.parse(localStorage.getItem("notes")) || [];
-let editIndex = null;
+let notes = JSON.parse(localStorage.getItem("notesUltra")) || [];
+let editIndex=null;
 
 const modal=document.getElementById("modal");
-const titleInput=document.getElementById("title");
-const contentDiv=document.getElementById("content");
 const notesDiv=document.getElementById("notes");
+const deleteInside=document.getElementById("deleteInside");
 
 function openModal(note=null,index=null){
-    modal.classList.remove("hidden");
-    if(note){
-        if(note.password){
-            const pass=prompt("Enter password:");
-            if(pass!==note.password){
-                alert("Wrong password");
-                closeModal();
-                return;
-            }
-        }
-        titleInput.value=note.title;
-        contentDiv.innerHTML=note.content;
-        document.getElementById("notePassword").value=note.password||"";
-        editIndex=index;
-    } else {
-        titleInput.value="";
-        contentDiv.innerHTML="";
-        document.getElementById("notePassword").value="";
-        editIndex=null;
-    }
+modal.classList.remove("hidden");
+
+if(note){
+if(note.password){
+let pass=prompt("Enter Password:");
+if(pass!==atob(note.password)){
+alert("Wrong Password");
+closeModal();
+return;
+}
+deleteInside.style.display="inline-block";
+}else{
+deleteInside.style.display="inline-block";
+}
+
+title.value=note.title;
+category.value=note.category;
+content.innerHTML=note.content;
+noteColor.value=note.color;
+notePassword.value="";
+editIndex=index;
+
+}else{
+title.value="";
+category.value="";
+content.innerHTML="";
+notePassword.value="";
+noteColor.value="#ffffff";
+deleteInside.style.display="none";
+editIndex=null;
+}
 }
 
 function closeModal(){
-    modal.classList.add("hidden");
+modal.classList.add("hidden");
 }
 
 function saveNote(){
-    const noteData={
-        title:titleInput.value,
-        content:contentDiv.innerHTML,
-        date:new Date().toLocaleString(),
-        password:document.getElementById("notePassword").value||null
-    };
+let data={
+title:title.value,
+category:category.value,
+content:content.innerHTML,
+color:noteColor.value,
+date:new Date().toLocaleString(),
+password:notePassword.value?btoa(notePassword.value):null,
+pinned:false
+};
 
-    if(editIndex!==null) notes[editIndex]=noteData;
-    else notes.push(noteData);
+if(editIndex!==null) data.pinned=notes[editIndex].pinned;
 
-    localStorage.setItem("notes",JSON.stringify(notes));
-    render();
-    closeModal();
+if(editIndex!==null) notes[editIndex]=data;
+else notes.push(data);
+
+localStorage.setItem("notesUltra",JSON.stringify(notes));
+render();
+closeModal();
 }
 
 function render(){
-    const search=document.getElementById("search").value.toLowerCase();
-    notesDiv.innerHTML="";
-    notes.forEach((n,i)=>{
-        if(search && !n.title.toLowerCase().includes(search)
-           && !n.content.toLowerCase().includes(search)) return;
+let searchValue=document.getElementById("search").value.toLowerCase();
+notesDiv.innerHTML="";
 
-        const div=document.createElement("div");
-        div.className="note";
-        div.innerHTML=`
-            <div class="actions">
-                ✏ <span onclick="openModal(notes[${i}],${i})">Edit</span>
-                🗑 <span onclick="deleteNote(${i})">Delete</span>
-            </div>
-            <h3>${n.title}</h3>
-            <div>${n.password?"🔐 Locked Note":n.content}</div>
-            <small>${n.date}</small>
-        `;
-        notesDiv.appendChild(div);
-    });
+notes.sort((a,b)=>b.pinned-a.pinned);
+
+notes.forEach((n,i)=>{
+if(searchValue && !n.title.toLowerCase().includes(searchValue)
+&& !n.content.toLowerCase().includes(searchValue)
+&& !n.category.toLowerCase().includes(searchValue)) return;
+
+let div=document.createElement("div");
+div.className="note";
+div.style.background=n.color;
+
+div.innerHTML=`
+<div class="actions">
+📌 <span onclick="togglePin(${i})">${n.pinned?"Unpin":"Pin"}</span>
+✏ <span onclick="openModal(notes[${i}],${i})">Edit</span>
+${!n.password?`🗑 <span onclick="deleteNote(${i})">Delete</span>`:''}
+</div>
+<h3>${n.title}</h3>
+<p style="font-size:12px;">#${n.category}</p>
+<div>${n.password?"🔐 Locked Note":n.content}</div>
+<small>${n.date}</small>
+`;
+
+notesDiv.appendChild(div);
+});
 }
 
 function deleteNote(i){
-    if(confirm("Delete this note?")){
-        notes.splice(i,1);
-        localStorage.setItem("notes",JSON.stringify(notes));
-        render();
-    }
+if(confirm("Delete this note?")){
+notes.splice(i,1);
+localStorage.setItem("notesUltra",JSON.stringify(notes));
+render();
+closeModal();
+}
 }
 
-function format(command){
-    document.execCommand(command,false,null);
+function togglePin(i){
+notes[i].pinned=!notes[i].pinned;
+localStorage.setItem("notesUltra",JSON.stringify(notes));
+render();
+}
+
+function format(cmd){
+document.execCommand(cmd,false,null);
+}
+
+function changeTextColor(color){
+document.execCommand("foreColor",false,color);
 }
 
 function startVoice(){
-    const SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition;
-    const recognition=new SpeechRecognition();
-    recognition.lang="en-US";
-    recognition.start();
-    recognition.onresult=function(e){
-        contentDiv.innerHTML+=e.results[0][0].transcript+" ";
-    };
+let SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition;
+let recognition=new SpeechRecognition();
+recognition.lang="en-US";
+recognition.start();
+recognition.onresult=(e)=>content.innerHTML+=e.results[0][0].transcript+" ";
 }
 
 function speakText(){
-    const speech=new SpeechSynthesisUtterance(contentDiv.innerText);
-    speechSynthesis.speak(speech);
+let speech=new SpeechSynthesisUtterance(content.innerText);
+speechSynthesis.speak(speech);
 }
 
 document.getElementById("imageUpload").onchange=function(){
-    const file=this.files[0];
-    const reader=new FileReader();
-    reader.onload=function(){
-        contentDiv.innerHTML+=`<img src="${reader.result}" style="max-width:100%;margin-top:8px;border-radius:10px;">`;
-    };
-    reader.readAsDataURL(file);
+let file=this.files[0];
+let reader=new FileReader();
+reader.onload=()=>content.innerHTML+=`<img src="${reader.result}" style="max-width:100%;margin-top:8px;border-radius:10px;">`;
+reader.readAsDataURL(file);
 };
 
 function toggleDark(){
-    document.body.classList.toggle("dark");
+document.body.classList.toggle("dark");
+}
+
+function exportPDF(){
+const { jsPDF } = window.jspdf;
+let doc=new jsPDF();
+let y=10;
+notes.forEach(n=>{
+doc.text(n.title,10,y); y+=8;
+doc.text(n.category,10,y); y+=8;
+doc.text(n.content.replace(/<[^>]*>/g,''),10,y); y+=15;
+});
+doc.save("StickyNotes.pdf");
 }
 
 render();
